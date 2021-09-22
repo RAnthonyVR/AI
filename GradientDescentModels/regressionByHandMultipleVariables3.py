@@ -231,11 +231,19 @@ def main():
 
 	# # Import the dataset
 	dataset = pd.read_csv('student-mat.csv', sep = ';')
+	dataset = pd.get_dummies(dataset, columns=["school"])
 	# # Load the diabetes dataset thta are already cleaned and preprocessed
-	x = list(dataset.iloc[:, 30:32].values) # rows and columns
-	columnNames = dataset.columns[30:32]
+	x = list(dataset.iloc[:, [5, 6, 12, 28, 29, 30, 32, 33]].values) # rows and columns
+	#print(enumerate(dataset.columns))
+	for i, v in enumerate(dataset.columns):
+		print (i, v)
+	#from sklearn.preprocessing import OneHotEncoder
+	
+	# delete title
+
+	columnNames = ["Medu", "Fedu", "studytime", "absences", "G1", "G2", "school_GP", "school_MS"]
 	#x = list(dataset['G1', 'G2'])# rows and columns
-	y = list(dataset.iloc[:, 32].values)
+	y = list(dataset.iloc[:, 31].values)
 
 	# initial value (0) of the coefficients depending on the number of variables
 	try: # multiple variables coefficient

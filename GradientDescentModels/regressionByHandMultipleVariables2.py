@@ -232,8 +232,11 @@ def main():
 	# # Import the dataset
 	dataset = pd.read_csv('student-mat.csv', sep = ';')
 	# # Load the diabetes dataset thta are already cleaned and preprocessed
-	x = list(dataset.iloc[:, 30:32].values) # rows and columns
-	columnNames = dataset.columns[30:32]
+	x = list(dataset.iloc[:, [29, 13, 30,31]].values) # rows and columns
+
+	# delete title
+
+	columnNames = ["absences", "studytime", "G1", "G2"]
 	#x = list(dataset['G1', 'G2'])# rows and columns
 	y = list(dataset.iloc[:, 32].values)
 
