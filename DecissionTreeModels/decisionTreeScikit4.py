@@ -62,4 +62,7 @@ for index, prediction in enumerate(predictions):
 print(acum / len(predictions))
 
 
+print("r2 score: ", hypothesis.score(xTesting, yTesting))
 
+# for y in predictions:
+# 	print(y)

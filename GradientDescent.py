@@ -14,6 +14,7 @@
 import pandas as pd
 from sklearn.model_selection import cross_val_score
 from sklearn import linear_model
+import numpy
 
 # Loss function: Sum of squared residuals
 # sum = (y1 - (yIntercept + slope * x1))^2 + (y2 - (yIntercept + slope * x2))^2 + ... (until xn and yn)
@@ -119,7 +120,7 @@ def makeQueries(columnNames,coefficients, yIntercept):
 	print("Insert independent terms")
 	xs = []
 	for index in range(len(coefficients)):
-		formattedString = "Insert an value for " + str(columnNames[index]) + " (from 0 to 20): "
+		formattedString = "Insert a value for " + str(columnNames[index]) + " : "
 		try:
 			x = int(input(formattedString))
 		except:
@@ -182,7 +183,7 @@ def calculateR2Score(calculatedResults, realResults):
 	length = 0
 
 	for forecast, actual in zip(calculatedResults, realResults):
-		sumSquares += (actual - forecast) ** 2
+		sumSquares += (forecast - meanYs) ** 2
 		squaredFromMeanY += (actual - meanYs) ** 2
 		length += 1
 
@@ -203,9 +204,9 @@ def scaling(x):
 
 			addition =+ x[column][row] # add all values in the same column
 		
-		mean = addition / (len(x[i])) # get current average of same column
+		mean = addition / (len(x[column])) # get current average of same column
 
-		maxOfTheColumn = max(x[i]) # get max average for mean scaling
+		maxOfTheColumn = max(x[column]) # get max average for mean scaling
 		
 		for row in range(len(x[column])):
 			x[column][row] = (x[column][row] - mean) / maxOfTheColumn  # mean scaling for all values
@@ -221,21 +222,17 @@ def main():
 	currentNumberOfSteps = 0
 	maximumNumberOfSteps = 1000
 
-	# dummy data (single variable)
-	# x = [1,2,3,4,5]
-	# y = [2,4,6,8,10]
-
-	# dummy data (multi variable)
-	# x = [[1,1],[2,2],[3,3],[4,4],[5,5],[2,2],[3,3],[4,4]]
-	# y = [2,4,6,8,10,2,5.5,16]
-
 	# # Import the dataset
 	dataset = pd.read_csv('student-mat.csv', sep = ';')
+	dataset = pd.get_dummies(dataset, columns=["school"])
 	# # Load the diabetes dataset thta are already cleaned and preprocessed
-	x = list(dataset.iloc[:, 30:32].values) # rows and columns
-	columnNames = dataset.columns[30:32]
+	x = list(dataset.iloc[:, [5, 6, 12, 28, 29, 30, 32, 33]].values) # rows and columns
+	
+	# delete title
+
+	columnNames = ["Medu", "Fedu", "studytime", "absences", "G1", "G2", "school_GP", "school_MS"]
 	#x = list(dataset['G1', 'G2'])# rows and columns
-	y = list(dataset.iloc[:, 32].values)
+	y = list(dataset.iloc[:, 31].values)
 
 	# initial value (0) of the coefficients depending on the number of variables
 	try: # multiple variables coefficient
@@ -249,7 +246,8 @@ def main():
 			formatedX.append(list(x)) 
 		x = formatedX
 
-	# TO DO: Scale data for convergence
+	# Scale data for convergence
+	# x = scaling(x)
 
 	# Divide into train and test
 	xTraining, yTraining, xTesting, yTesting =  divideTrainAndTestData(x, y)
@@ -263,33 +261,20 @@ def main():
 	print("Final y intercept: ", yIntercept)
 	print()
 
-	# Train error
-	# lasso = linear_model.Lasso()
-	# crossvalidation_errors = cross_val_score(lasso, xTraining, yTraining)
-	# trainError = 0
-	# # average
-	# for error in crossvalidation_errors:
-	# 	trainError += error
-
-	# trainError = trainError / len(crossvalidation_errors)
-	# print("Train error: ", trainError)
-
-	# # Validation error ?
-	# print("Validation error: ")
-
-	# TO DO: Additional testing for production
-
 	testResultsY = [evaluateLinearFunction(coefficients, x, yIntercept) for x in xTesting]
 
 	# Get Test error
 	# print("Test error")
 	print("MSE: ", calculateMSE(testResultsY, yTesting))
+	print("R2Score: ", calculateR2Score(testResultsY, yTesting))
 	print()
-	# print("R2Score: ", calculateR2Score(testResultsY, yTesting))
 
 	# Query prediction
 	makeQueries(columnNames, coefficients, yIntercept)
 
+
+	# for y in testResultsY:
+	# 	print(y)
 
 if __name__ == "__main__":
     main()
